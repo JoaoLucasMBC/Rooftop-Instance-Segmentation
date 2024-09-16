@@ -9,11 +9,13 @@ import matplotlib.pyplot as plt
 # Define constants
 NUM_CLASSES = 2     
 EPOCHS = 17
-BATCH_SIZE = 2
+BATCH_SIZE = 1
 DROPOUT = 0.75
-image_shape = (3584, 3584)
+image_shape = (3584, 3584, 3)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+print(tf.__version__)
+print(tf.test.is_gpu_available())
 
 # Placeholders
 correct_label = tf.placeholder(tf.float32, [None, image_shape[0], image_shape[1], NUM_CLASSES])
@@ -21,17 +23,17 @@ learning_rate = tf.placeholder(tf.float32)
 keep_prob = tf.placeholder(tf.float32)
 
 # Directories
-root = 'data'
-rgb_dir = root + '/train/image'
-gt_dir = root + '/train/label'
+root = './data'
+rgb_dir = root + '/resized/train/image'
+gt_dir = root + '/resized/train/label'
 
 
-vgg_path = 'vgg' # When downloading VGG model
-# vgg_path = 'vgg/vgg' # Uncomment this when you have downloaded 
+#vgg_path = './vgg' # When downloading VGG model
+vgg_path = './vgg/vgg' # Uncomment this when you have downloaded 
 runs_dir = './runs'
 
 # Comment this when downloaded VGG model
-helper.maybe_download_pretrained_vgg(vgg_path)
+#helper.maybe_download_pretrained_vgg(vgg_path)
 '''
 Get image by concatenating <dir_name> and <file_from_list>
 Example: image = cv2.imread(rgb_dir + rgb_list[0], 1) to read first image from RGB
@@ -64,5 +66,10 @@ with tf.Session() as sess:
         helper_functions.train_nn(sess, EPOCHS, BATCH_SIZE, get_batches_fn,
                 train_op, loss_op, input_tensor, correct_label, keep_prob, learning_rate)
         print("Finished training")
+        
+        # Saving the model
+        saver = tf.train.Saver()
+        saver.save(sess, './vgg/checkpoints/final_1.ckpt')  # Specify your path and model name
+        print("Model saved")
 
-        helper.save_inference_samples(runs_dir, 'data/test', sess, image_shape, logits, keep_prob, input_tensor)
+        helper.save_inference_samples(runs_dir, './data/resized/test', sess, image_shape, logits, keep_prob, input_tensor)

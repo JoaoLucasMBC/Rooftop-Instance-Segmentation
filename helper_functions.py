@@ -78,6 +78,9 @@ def train_nn(sess, epochs, batch_size, get_batches_fn,
     
     keep_prob_value = 0.5
     learning_rate_value = 0.0001
+    early_stopping_threshold = 1e-4
+
+    prev_loss = None
 
     for epoch in range(epochs):
         '''Atleast initially'''
@@ -89,10 +92,19 @@ def train_nn(sess, epochs, batch_size, get_batches_fn,
 
             total_loss += loss
 
+            del X_batch, gt_batch
+
         print('Epoch {}...'.format(epoch+1))
         print('Loss {:.3f}'.format(total_loss))
         print()
 
+        if prev_loss is not None:
+            loss_dif = abs(prev_loss - total_loss)
+            if loss_dif < early_stopping_threshold:
+                print(f'Early stopping at epoch {epoch+1} due to small loss change: {loss_diff:.6f}')
+                break  # Stop training if the change in loss is smaller than the threshold
+
+        prev_loss = total_loss
 
 
 

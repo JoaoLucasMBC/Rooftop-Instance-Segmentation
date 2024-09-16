@@ -3,3 +3,5 @@ tensorflow-gpu==1.15.4
 scipy==1.0.0
 pillow
 opencv-python
+tqdm
+matplotlib

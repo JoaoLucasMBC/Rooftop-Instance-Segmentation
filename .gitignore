@@ -1,0 +1,6 @@
+/vgg/checkpoints
+/runs
+/vgg
+/__pycache__
+/data
+/logs

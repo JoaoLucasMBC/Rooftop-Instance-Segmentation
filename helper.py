@@ -72,14 +72,14 @@ def gen_batch_function(data_folder, image_shape):
         :param batch_size: Batch Size
         :return: Batches of training data
         """
-        image_paths = glob(os.path.join(data_folder, 'train', 'image', '*.png'))
+        image_paths = glob(os.path.join(data_folder,'resized',  'train', 'image', '*.png'))
         if(len(image_paths) > 0):
             print('Found {0} training images'.format(len(image_paths)))
         else:
             print('Something is wrong. I couldn\'t see any images')
         label_paths = {
             re.sub(r'_vis', '', os.path.basename(path)): path
-            for path in glob(os.path.join(data_folder, 'train', 'label', '*.png'))}
+            for path in glob(os.path.join(data_folder, 'resized', 'train', 'label', '*.png'))}
 
         if(len(label_paths) > 0):
             print('Found {0} training labels'.format(len(label_paths)))
@@ -96,10 +96,20 @@ def gen_batch_function(data_folder, image_shape):
 
                 image = scipy.misc.imresize(scipy.misc.imread(image_file), image_shape)
                 gt_image = scipy.misc.imresize(scipy.misc.imread(gt_image_file), image_shape)
-                print(image.shape, gt_image.shape)
+                #print(image.shape, gt_image.shape)
+                #print(gt_image)
+
+                gt_image = np.stack([gt_image * 255] * 3, axis=-1)
+
+                #print(gt_image.shape)
+                #print(gt_image)
+
                 gt_bg = np.all(gt_image == background_color, axis=2)
                 gt_bg = gt_bg.reshape(*gt_bg.shape, 1)
                 gt_image = np.concatenate((gt_bg, np.invert(gt_bg)), axis=2)
+                
+                #print(gt_image.shape)
+                #print(gt_image)
 
                 images.append(image)
                 gt_images.append(gt_image)
@@ -143,7 +153,7 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
     # Run NN on test images and save them to HD
     print('Training Finished. Saving test images to: {}'.format(output_dir))
     image_outputs = gen_test_output(
-        sess, logits, keep_prob, input_image, os.path.join(data_dir, 'test'), image_shape)
+        sess, logits, keep_prob, input_image, os.path.join(data_dir, 'image'), image_shape)
     for name, image in image_outputs:
         cv2.imwrite(os.path.join(output_dir, name), image)
 
